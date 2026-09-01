@@ -22,12 +22,16 @@
 <label class="text-sm text-slate-300">Amount you may diversify<input id="diversifyAmount" type="number" class="field mt-2" value="2500000"></label>
 <label class="text-sm text-slate-300">Staged sale period<select id="years" class="field mt-2"><option>1</option><option selected>3</option><option>5</option><option>10</option></select></label>
 </div>
-<h3 class="mt-8 font-bold">Planning tax assumptions</h3><p class="mt-2 text-sm text-slate-500">Adjustable illustration rates, not a tax-return calculation.</p>
-<div class="mt-4 grid gap-4 sm:grid-cols-3">
-<label class="text-sm text-slate-300">Federal LTCG %<input id="fedRate" type="number" class="field mt-2" value="20" step=".1"></label>
-<label class="text-sm text-slate-300">NIIT %<input id="niitRate" type="number" class="field mt-2" value="3.8" step=".1"></label>
-<label class="text-sm text-slate-300">State planning %<input id="stateRate" type="number" class="field mt-2" value="0" step=".1"></label>
+<h3 class="mt-8 font-bold">Planning tax assumptions</h3><p class="mt-2 text-sm text-slate-500">Long-term rates are applied using the 2026 federal brackets, stacked on the other income you enter. Illustration only, not a tax-return calculation.</p>
+<div class="mt-4 grid gap-4 sm:grid-cols-2">
+<label class="text-sm text-slate-300">Filing status<select id="filingStatus" class="field mt-2"><option value="single">Single</option><option value="mfj" selected>Married filing jointly</option><option value="hoh">Head of household</option></select></label>
+<label class="text-sm text-slate-300">Other taxable income<input id="otherIncome" type="number" class="field mt-2" value="250000" step="1000"></label>
 </div>
+<div class="mt-4 grid gap-4 sm:grid-cols-2">
+<label class="text-sm text-slate-300">State planning %<input id="stateRate" type="number" class="field mt-2" value="0" step=".1"></label>
+<div class="text-sm text-slate-300">Blended rate on a full sale<p id="effRate" class="field mt-2 !bg-slate-950/40 text-slate-400">--</p></div>
+</div>
+<p class="mt-3 text-xs leading-5 text-slate-500">Long-term capital gains stack on top of your other taxable income, so the bracket a gain falls into depends on that income and your filing status. Short-term gains, AMT, the additional Medicare tax, deductions, losses, carryforwards and state-specific rules are not modelled.</p>
 <div class="mt-8 grid gap-4 sm:grid-cols-2">
 <label class="text-sm text-slate-300">Insider / trading restrictions?<select id="insider" class="field mt-2"><option value="no">No / Unsure</option><option value="yes">Yes</option></select></label>
 <label class="text-sm text-slate-300">Existing charitable intent?<select id="charitable" class="field mt-2"><option value="no">No / Unsure</option><option value="yes">Yes</option></select></label>
@@ -48,7 +52,7 @@
 <tr class="border-b border-white/10"><td class="py-4 pr-4 font-semibold">Stage sales</td><td id="stageAmt" class="pr-4"></td><td id="stageTax" class="pr-4"></td><td class="text-slate-400">Diversifies over time; future price/rate uncertainty remains.</td></tr>
 <tr><td class="py-4 pr-4 font-semibold">Exchange / in-kind review</td><td id="exchangeAmt" class="pr-4"></td><td class="pr-4 text-gold">Potential deferral only if eligible</td><td class="text-slate-400">Eligibility, liquidity, fees and structure-specific rules matter.</td></tr>
 </tbody></table></div>
-<p class="mt-5 text-xs leading-5 text-slate-500">*Simplified estimate: proportional basis on shares sold times user-entered planning tax rate. It does not calculate tax brackets, AMT, deductions, losses, state-specific rules, transaction expenses, RSU/ESPP treatment or other tax items.</p></div>
+<p class="mt-5 text-xs leading-5 text-slate-500">*Simplified estimate. Basis is applied proportionally to the shares sold. Federal long-term capital gains are stacked on the other taxable income entered, using the 2026 brackets, and the net investment income tax is applied above the statutory threshold. It is still only an estimate: it does not model short-term gains, AMT, the additional Medicare tax, deductions, losses, carryforwards, credits, phase-outs, alternative filing statuses, state-specific rules, transaction expenses, RSU/ESPP treatment or any other tax item, and it assumes the income you entered stays unchanged in every year shown. Your actual tax will differ. Confirm any number here with your tax adviser before acting on it.</p></div>
 <div id="advancedFlags" class="card mt-6 p-6"></div>
 </div></div></div></section>
 

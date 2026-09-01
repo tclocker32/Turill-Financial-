@@ -14,7 +14,8 @@
 <div data-form-error class="mb-6 hidden rounded-2xl border border-red-400/40 bg-red-500/10 px-5 py-4 text-sm text-red-200" role="alert">
 We couldn&rsquo;t send that. Please check that your name and a valid email address are filled in, then try again.
 </div>
-<form action="/stock-review" method="POST" class="card p-6 sm:p-8"><p class="eyebrow">Request Your Private Snapshot</p><h2 class="mt-3 font-display text-3xl font-bold">Give me enough context to make the first conversation useful.</h2>
+<form action="/stock-review" method="POST" class="card p-6 sm:p-8">
+<input type="hidden" name="filing_status" id="qFilingStatus"><input type="hidden" name="other_income" id="qOtherIncome"><p class="eyebrow">Request Your Private Snapshot</p><h2 class="mt-3 font-display text-3xl font-bold">Give me enough context to make the first conversation useful.</h2>
 <div class="mt-7 grid gap-4 sm:grid-cols-2">
 <label class="text-sm text-slate-300">Full name<input required name="name" class="field mt-2"></label>
 <label class="text-sm text-slate-300">Email<input required type="email" name="email" class="field mt-2"></label>
@@ -38,5 +39,7 @@ const p=new URLSearchParams(location.search), map={ticker:"qTicker",value:"qValu
 for(const [k,id] of Object.entries(map)){if(p.get(k))document.getElementById(id).value=k==="concentration"?p.get(k)+"%":(k==="ticker"?p.get(k):"$"+Number(p.get(k)).toLocaleString());}
 if(p.get("insider")==="yes")document.getElementById("qInsider").value="Yes";
 if(p.get("charitable")==="yes")document.getElementById("qCharitable").value="Yes";
+if(p.get("filing_status"))document.getElementById("qFilingStatus").value=p.get("filing_status");
+if(p.get("other_income"))document.getElementById("qOtherIncome").value=p.get("other_income");
 </script>
 </main>
