@@ -20,5 +20,13 @@ app.post("/stock-review", (req, res) => {
   saveLead("concentrated-stock", req.body);
   res.redirect("/stock-review-thank-you.html");
 });
+app.post("/stock-review", (req, res) => {
+  ...
+});
 
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+app.listen(PORT, () => console.log(`Turill Financial V2 running at http://localhost:${PORT}`));
 app.listen(PORT, () => console.log(`Turill Financial V2 running at http://localhost:${PORT}`));
