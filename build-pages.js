@@ -1,0 +1,92 @@
+/**
+ * Page builder.
+ *
+ * Takes the content files in src/pages/, wraps each one in the shared <head>,
+ * header and footer from src/partials/, and writes the finished page into
+ * public/.
+ *
+ * Why this exists: the header and footer previously lived, copy-pasted, inside
+ * every page. They drifted apart — which is exactly how the site ended up with
+ * the old brand in some places and the new brand in others. Now they are
+ * written once and stamped onto every page at build time.
+ *
+ * To edit the nav or the footer, edit src/partials/. To edit a page's content,
+ * edit src/pages/<name>.html. Then run `npm run build`.
+ */
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = __dirname;
+const PAGES = path.join(ROOT, "src", "pages");
+const PARTIALS = path.join(ROOT, "src", "partials");
+const OUT = path.join(ROOT, "public");
+const SITE = "https://turillfinancial.com";
+
+const header = fs.readFileSync(path.join(PARTIALS, "header.html"), "utf8");
+const footer = fs.readFileSync(path.join(PARTIALS, "footer.html"), "utf8");
+
+const NAV_KEYS = ["home", "concentrated", "analyzer", "about", "contact"];
+
+function shell(meta, body) {
+  const canonical = meta.url ? `${SITE}${meta.url}` : null;
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="${meta.description}" />
+  <title>${meta.title}</title>
+${canonical ? `  <link rel="canonical" href="${canonical}" />\n` : ""}${meta.noindex ? `  <meta name="robots" content="noindex" />\n` : ""}  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Turill Financial" />
+  <meta property="og:title" content="${meta.title}" />
+  <meta property="og:description" content="${meta.description}" />
+${canonical ? `  <meta property="og:url" content="${canonical}" />\n` : ""}  <meta property="og:image" content="${SITE}/assets/turill-financial-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="flex min-h-screen flex-col font-sans">
+${header}
+${body}
+${footer}
+  <script src="/app.js" defer></script>
+${meta.scripts ? meta.scripts.map((s) => `  <script src="${s}" defer></script>`).join("\n") + "\n" : ""}</body>
+</html>
+`;
+}
+
+function applyNav(html, active) {
+  return NAV_KEYS.reduce(
+    (acc, key) =>
+      acc.replaceAll(
+        `{{NAV_${key}}}`,
+        key === active ? "nav-link-active" : "nav-link"
+      ),
+    html
+  );
+}
+
+const files = fs.readdirSync(PAGES).filter((f) => f.endsWith(".html"));
+let built = 0;
+
+for (const file of files) {
+  const raw = fs.readFileSync(path.join(PAGES, file), "utf8");
+  const match = raw.match(/^<!--META\s*([\s\S]*?)-->\s*/);
+  if (!match) throw new Error(`${file} is missing its <!--META ... --> block`);
+
+  const meta = JSON.parse(match[1]);
+  const body = raw.slice(match[0].length);
+  const page = applyNav(shell(meta, body), meta.nav);
+
+  const leftover = page.match(/\{\{NAV_[a-z]+\}\}/);
+  if (leftover) throw new Error(`${file}: unreplaced token ${leftover[0]}`);
+
+  fs.writeFileSync(path.join(OUT, file), page);
+  built++;
+}
+
+console.log(`built ${built} pages -> public/`);

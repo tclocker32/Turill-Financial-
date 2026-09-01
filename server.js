@@ -34,21 +34,41 @@ function escapeHtml(value) {
 }
 
 function bookingBlock() {
-  if (!/^https:\/\/|^http:\/\//i.test(BOOKING_URL)) return "";
+  if (!/^https?:\/\//i.test(BOOKING_URL)) return "";
   return `
-          <div class="glass rounded-3xl border-gold/25 bg-gold/[0.07] p-8 shadow-soft">
-            <p class="eyebrow">Prefer to Pick a Time?</p>
-            <h2 class="mt-4 font-display text-2xl font-bold text-white">Book directly on the calendar.</h2>
-            <p class="mt-3 text-sm leading-7 text-slate-300">Choose a slot that works for you and we&rsquo;ll take it from there.</p>
-            <a href="${escapeHtml(BOOKING_URL)}" class="btn-primary mt-6" target="_blank" rel="noopener noreferrer">${escapeHtml(BOOKING_LABEL)}</a>
-          </div>`;
+        <div class="glass rounded-3xl border-gold/25 bg-gold/[0.07] p-8 shadow-soft">
+          <p class="eyebrow">Prefer to Pick a Time?</p>
+          <h2 class="mt-4 font-display text-2xl font-bold text-white">Book directly on the calendar.</h2>
+          <p class="mt-3 text-sm leading-7 text-slate-300">Choose a slot that works for you and we&rsquo;ll take it from there.</p>
+          <a href="${escapeHtml(BOOKING_URL)}" class="btn-primary mt-6" target="_blank" rel="noopener noreferrer">${escapeHtml(BOOKING_LABEL)}</a>
+        </div>`;
 }
 
 /* ------------------------------------------------------------------ *
  * Lead capture
  * ------------------------------------------------------------------ */
-function saveLead(type, data) {
-  const record = { type, ...data, createdAt: new Date().toISOString() };
+const FIELD_LIMIT = 4000;
+const MAX_FIELDS = 40;
+
+// Keep every field the form sends. The stock-review form carries the whole
+// analyzer snapshot (ticker, basis, concentration, insider status…), so a
+// hard-coded allow-list would silently throw that away.
+function collectFields(body) {
+  const out = {};
+  for (const [key, value] of Object.entries(body || {})) {
+    if (key === "company") continue; // honeypot, never stored
+    if (Object.keys(out).length >= MAX_FIELDS) break;
+    out[String(key).slice(0, 80)] = String(
+      Array.isArray(value) ? value.join(", ") : value
+    )
+      .trim()
+      .slice(0, FIELD_LIMIT);
+  }
+  return out;
+}
+
+function saveLead(type, fields) {
+  const record = { type, ...fields, createdAt: new Date().toISOString() };
 
   // Always log — on Render this shows up in the service Logs tab.
   console.log("[lead]", JSON.stringify(record));
@@ -84,10 +104,19 @@ function sendPage(res, file) {
   res.sendFile(path.join(PUBLIC_DIR, file));
 }
 
-app.get("/", (req, res) => sendPage(res, "index.html"));
-app.get("/about", (req, res) => sendPage(res, "about.html"));
-app.get("/thank-you", (req, res) => sendPage(res, "thank-you.html"));
+const ROUTES = {
+  "/": "index.html",
+  "/about": "about.html",
+  "/concentrated-stock": "concentrated-stock.html",
+  "/stock-analyzer": "stock-analyzer.html",
+  "/stock-review": "stock-review.html",
+  "/thank-you": "thank-you.html"
+};
+Object.entries(ROUTES).forEach(([url, file]) => {
+  app.get(url, (req, res) => sendPage(res, file));
+});
 
+// Contact is rendered rather than sent, so the booking card can be injected.
 app.get("/contact", (req, res) => {
   fs.readFile(path.join(PUBLIC_DIR, "contact.html"), "utf8", (err, html) => {
     if (err) return sendPage(res, "contact.html");
@@ -100,18 +129,26 @@ const ALIASES = {
   "/index.html": "/",
   "/about.html": "/about",
   "/contact.html": "/contact",
+  "/concentrated-stock.html": "/concentrated-stock",
+  "/stock-analyzer.html": "/stock-analyzer",
+  "/stock-review.html": "/stock-review",
   "/thank-you.html": "/thank-you",
   "/stock-review-thank-you.html": "/thank-you"
 };
 Object.entries(ALIASES).forEach(([from, to]) => {
-  app.get(from, (req, res) => res.redirect(301, to));
+  app.get(from, (req, res) => {
+    const qs = req.originalUrl.includes("?")
+      ? req.originalUrl.slice(req.originalUrl.indexOf("?"))
+      : "";
+    res.redirect(301, to + qs);
+  });
 });
 
 app.use(
   express.static(PUBLIC_DIR, {
-    extensions: false,
+    index: false,
     setHeaders(res, filePath) {
-      if (/\.(css|js|svg|png|jpg|jpeg|webp|woff2?)$/i.test(filePath)) {
+      if (/\.(css|js|svg|png|jpg|jpeg|webp|ico|woff2?)$/i.test(filePath)) {
         res.setHeader("Cache-Control", "public, max-age=3600");
       }
     }
@@ -121,7 +158,7 @@ app.use(
 /* ------------------------------------------------------------------ *
  * Form handlers
  * ------------------------------------------------------------------ */
-function handleLead(type) {
+function handleLead(type, errorPath) {
   return (req, res) => {
     const body = req.body || {};
 
@@ -132,23 +169,16 @@ function handleLead(type) {
     const email = String(body.email || "").trim();
 
     if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
-      return res.redirect(303, "/contact?error=1");
+      return res.redirect(303, `${errorPath}?error=1`);
     }
 
-    saveLead(type, {
-      name: name.slice(0, 200),
-      email: email.slice(0, 200),
-      phone: String(body.phone || "").trim().slice(0, 60),
-      focus: String(body.focus || "").trim().slice(0, 120),
-      message: String(body.message || "").trim().slice(0, 4000)
-    });
-
+    saveLead(type, collectFields(body));
     res.redirect(303, "/thank-you");
   };
 }
 
-app.post("/contact", handleLead("contact"));
-app.post("/stock-review", handleLead("concentrated-stock"));
+app.post("/contact", handleLead("contact", "/contact"));
+app.post("/stock-review", handleLead("concentrated-stock", "/stock-review"));
 
 // Simple uptime check.
 app.get("/healthz", (req, res) => res.json({ ok: true }));

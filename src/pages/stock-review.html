@@ -1,0 +1,42 @@
+<!--META {
+  "title": "Custom Concentrated Stock Exit Strategy | Turill Financial",
+  "description": "Request a custom concentrated-stock exit strategy from Turill Financial.",
+  "url": "/stock-review",
+  "nav": "concentrated"
+}-->
+<main id="top" class="flex-1 pt-20">
+<section class="section-pad"><div class="container-shell grid gap-12 lg:grid-cols-[.85fr_1.15fr]">
+<div><p class="eyebrow">Private Planning Engagement</p><h1 class="mt-4 font-display text-5xl font-extrabold">Custom Concentrated Stock Exit Strategy</h1>
+<p class="mt-6 text-lg leading-8 text-slate-300">The objective is not to find one clever transaction. It is to build a coordinated path for reducing concentration while balancing taxes, liquidity, control, restrictions and the role this stock should continue to play in your financial life.</p>
+<div class="mt-8 rounded-3xl border border-gold/25 bg-gold/10 p-7"><p class="text-xs font-bold uppercase tracking-[.18em] text-gold">Planning Fee</p><p class="mt-2 font-display text-5xl font-extrabold">$2,000</p><p class="mt-3 leading-7 text-slate-300">One-time custom analysis and exit-strategy roadmap. Implementation, investment products, legal work, tax return preparation and third-party professional fees are separate.</p></div>
+<div class="mt-8 space-y-4 text-slate-300"><p>✓ Concentration and embedded-gain map</p><p>✓ Tax-lot, restriction, liquidity and retained-ownership review</p><p>✓ Multiple modeled exit scenarios</p><p>✓ Evaluation of applicable tax-aware, exchange, charitable, hedging and sequencing opportunities</p><p>✓ Personalized action roadmap and strategy review meeting</p></div>
+</div>
+<div data-form-error class="mb-6 hidden rounded-2xl border border-red-400/40 bg-red-500/10 px-5 py-4 text-sm text-red-200" role="alert">
+We couldn&rsquo;t send that. Please check that your name and a valid email address are filled in, then try again.
+</div>
+<form action="/stock-review" method="POST" class="card p-6 sm:p-8"><p class="eyebrow">Request Your Private Snapshot</p><h2 class="mt-3 font-display text-3xl font-bold">Give me enough context to make the first conversation useful.</h2>
+<div class="mt-7 grid gap-4 sm:grid-cols-2">
+<label class="text-sm text-slate-300">Full name<input required name="name" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Email<input required type="email" name="email" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Phone<input name="phone" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Company / ticker<input name="ticker" id="qTicker" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Approx. position value<input name="position_value" id="qValue" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Approx. cost basis<input name="cost_basis" id="qBasis" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Approx. concentration %<input name="concentration" id="qConcentration" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Amount you may diversify<input name="diversify_amount" id="qDiversify" class="field mt-2"></label>
+<label class="text-sm text-slate-300">Insider / trading restrictions?<select name="insider" id="qInsider" class="field mt-2"><option>Unsure</option><option>No</option><option>Yes</option></select></label>
+<label class="text-sm text-slate-300">Existing charitable intent?<select name="charitable" id="qCharitable" class="field mt-2"><option>Unsure</option><option>No</option><option>Yes</option></select></label>
+</div>
+<label class="mt-4 block text-sm text-slate-300">What matters most right now?<select name="priority" class="field mt-2"><option>Reduce risk without an unnecessary tax event</option><option>Create liquidity</option><option>Maximize tax deferral</option><option>Retain meaningful ownership</option><option>Coordinate charitable giving</option><option>Compare the tradeoffs</option></select></label>
+<label class="mt-4 block text-sm text-slate-300">Anything else we should know?<textarea name="notes" rows="4" class="field mt-2"></textarea></label>
+<label class="mt-5 flex items-start gap-3 text-xs leading-5 text-slate-500"><input required type="checkbox" name="consent" value="yes" class="mt-1">I understand this request is for an educational planning engagement and does not itself create an advisory, tax or legal relationship or guarantee that any strategy will be available or appropriate.</label>
+<button type="submit" class="btn-primary mt-7 w-full">Request My Custom Exit Strategy</button>
+<p class="mt-4 text-center text-xs text-slate-500">Prototype: connect your approved payment / agreement workflow before launch.</p></form>
+</div></section>
+<script>
+const p=new URLSearchParams(location.search), map={ticker:"qTicker",value:"qValue",basis:"qBasis",concentration:"qConcentration",diversify:"qDiversify"};
+for(const [k,id] of Object.entries(map)){if(p.get(k))document.getElementById(id).value=k==="concentration"?p.get(k)+"%":(k==="ticker"?p.get(k):"$"+Number(p.get(k)).toLocaleString());}
+if(p.get("insider")==="yes")document.getElementById("qInsider").value="Yes";
+if(p.get("charitable")==="yes")document.getElementById("qCharitable").value="Yes";
+</script>
+</main>

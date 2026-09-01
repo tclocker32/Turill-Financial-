@@ -1,0 +1,35 @@
+<a href="#top" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-gold focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-ink">Skip to content</a>
+
+<header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
+  <div class="container-shell flex h-20 items-center justify-between gap-6">
+    <a href="/" aria-label="Turill Financial home">
+      <img src="/assets/turill-financial-wordmark-dark.png" alt="Turill Financial" class="h-9 w-auto max-w-[230px] object-contain" width="720" height="94" />
+    </a>
+
+    <nav class="hidden items-center gap-7 xl:flex" aria-label="Primary">
+      <a href="/" class="{{NAV_home}}">Home</a>
+      <a href="/concentrated-stock" class="{{NAV_concentrated}}">Concentrated Stock</a>
+      <a href="/stock-analyzer" class="{{NAV_analyzer}}">Analyzer</a>
+      <a href="/about" class="{{NAV_about}}">About Us</a>
+      <a href="/contact" class="{{NAV_contact}}">Contact Us</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="/stock-analyzer" class="btn-primary hidden sm:inline-flex">Analyze My Stock</a>
+      <button type="button" id="menu-toggle" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 text-white xl:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden border-t border-white/10 bg-ink/95 px-5 pb-6 pt-3 xl:hidden">
+    <nav class="grid gap-1" aria-label="Mobile">
+      <a href="/" class="nav-link-mobile">Home</a>
+      <a href="/concentrated-stock" class="nav-link-mobile">Concentrated Stock</a>
+      <a href="/stock-analyzer" class="nav-link-mobile">Analyzer</a>
+      <a href="/about" class="nav-link-mobile">About Us</a>
+      <a href="/contact" class="nav-link-mobile">Contact Us</a>
+      <a href="/contact" class="btn-primary mt-3">Schedule a Conversation</a>
+    </nav>
+  </div>
+</header>

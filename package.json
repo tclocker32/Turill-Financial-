@@ -7,7 +7,8 @@
     "dev:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --watch",
     "build:css": "tailwindcss -i ./src/input.css -o ./public/styles.css --minify",
     "start": "node server.js",
-    "build": "npm run build:css"
+    "build": "npm run build:pages && npm run build:css",
+    "build:pages": "node build-pages.js"
   },
   "dependencies": {
     "express": "^5.1.0"

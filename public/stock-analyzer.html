@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A free planning snapshot of your concentrated stock position: concentration, embedded gain, downside exposure and the tradeoffs between selling now, staging sales or exchange structures." />
+  <title>Concentrated Stock Analyzer | Turill Financial</title>
+  <link rel="canonical" href="https://turillfinancial.com/stock-analyzer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Turill Financial" />
+  <meta property="og:title" content="Concentrated Stock Analyzer | Turill Financial" />
+  <meta property="og:description" content="A free planning snapshot of your concentrated stock position: concentration, embedded gain, downside exposure and the tradeoffs between selling now, staging sales or exchange structures." />
+  <meta property="og:url" content="https://turillfinancial.com/stock-analyzer" />
+  <meta property="og:image" content="https://turillfinancial.com/assets/turill-financial-icon.png" />
+  <meta name="twitter:card" content="summary" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body class="flex min-h-screen flex-col font-sans">
+<a href="#top" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-gold focus:px-5 focus:py-3 focus:text-sm focus:font-bold focus:text-ink">Skip to content</a>
+
+<header class="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-ink/90 backdrop-blur-xl">
+  <div class="container-shell flex h-20 items-center justify-between gap-6">
+    <a href="/" aria-label="Turill Financial home">
+      <img src="/assets/turill-financial-wordmark-dark.png" alt="Turill Financial" class="h-9 w-auto max-w-[230px] object-contain" width="720" height="94" />
+    </a>
+
+    <nav class="hidden items-center gap-7 xl:flex" aria-label="Primary">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/concentrated-stock" class="nav-link">Concentrated Stock</a>
+      <a href="/stock-analyzer" class="nav-link-active">Analyzer</a>
+      <a href="/about" class="nav-link">About Us</a>
+      <a href="/contact" class="nav-link">Contact Us</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <a href="/stock-analyzer" class="btn-primary hidden sm:inline-flex">Analyze My Stock</a>
+      <button type="button" id="menu-toggle" class="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 text-white xl:hidden" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-menu" class="hidden border-t border-white/10 bg-ink/95 px-5 pb-6 pt-3 xl:hidden">
+    <nav class="grid gap-1" aria-label="Mobile">
+      <a href="/" class="nav-link-mobile">Home</a>
+      <a href="/concentrated-stock" class="nav-link-mobile">Concentrated Stock</a>
+      <a href="/stock-analyzer" class="nav-link-mobile">Analyzer</a>
+      <a href="/about" class="nav-link-mobile">About Us</a>
+      <a href="/contact" class="nav-link-mobile">Contact Us</a>
+      <a href="/contact" class="btn-primary mt-3">Schedule a Conversation</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top" class="flex-1 pt-20">
+<section class="section-pad"><div class="container-shell">
+<div class="max-w-4xl"><p class="eyebrow">Free Educational Snapshot</p><h1 class="mt-4 font-display text-5xl font-extrabold sm:text-6xl">What is your company-stock position really asking you to decide?</h1>
+<p class="mt-6 text-lg leading-8 text-slate-300">Enter a few planning assumptions to estimate concentration, embedded gain, downside exposure and the immediate tax tradeoff of diversifying. Nothing is submitted until you request a private review.</p></div>
+
+<div class="mt-12 grid gap-8 lg:grid-cols-[.9fr_1.1fr]">
+<form id="analyzerForm" class="card p-6 sm:p-8"><h2 class="font-display text-2xl font-bold">Your position</h2>
+<div class="mt-6 grid gap-4 sm:grid-cols-2">
+<label class="text-sm text-slate-300">Ticker / Company<input id="ticker" class="field mt-2" placeholder="e.g., NVDA"></label>
+<label class="text-sm text-slate-300">Current stock value<input id="stockValue" type="number" class="field mt-2" value="5000000"></label>
+<label class="text-sm text-slate-300">Total cost basis<input id="costBasis" type="number" class="field mt-2" value="750000"></label>
+<label class="text-sm text-slate-300">Other investable assets<input id="otherAssets" type="number" class="field mt-2" value="2500000"></label>
+<label class="text-sm text-slate-300">Amount you may diversify<input id="diversifyAmount" type="number" class="field mt-2" value="2500000"></label>
+<label class="text-sm text-slate-300">Staged sale period<select id="years" class="field mt-2"><option>1</option><option selected>3</option><option>5</option><option>10</option></select></label>
+</div>
+<h3 class="mt-8 font-bold">Planning tax assumptions</h3><p class="mt-2 text-sm text-slate-500">Adjustable illustration rates, not a tax-return calculation.</p>
+<div class="mt-4 grid gap-4 sm:grid-cols-3">
+<label class="text-sm text-slate-300">Federal LTCG %<input id="fedRate" type="number" class="field mt-2" value="20" step=".1"></label>
+<label class="text-sm text-slate-300">NIIT %<input id="niitRate" type="number" class="field mt-2" value="3.8" step=".1"></label>
+<label class="text-sm text-slate-300">State planning %<input id="stateRate" type="number" class="field mt-2" value="0" step=".1"></label>
+</div>
+<div class="mt-8 grid gap-4 sm:grid-cols-2">
+<label class="text-sm text-slate-300">Insider / trading restrictions?<select id="insider" class="field mt-2"><option value="no">No / Unsure</option><option value="yes">Yes</option></select></label>
+<label class="text-sm text-slate-300">Existing charitable intent?<select id="charitable" class="field mt-2"><option value="no">No / Unsure</option><option value="yes">Yes</option></select></label>
+</div><button type="submit" class="btn-primary mt-8 w-full">Update My Snapshot</button></form>
+
+<div>
+<div class="grid gap-4 sm:grid-cols-2">
+<div class="metric"><p class="text-sm text-slate-400">Portfolio concentration</p><p id="concentration" class="mt-2 font-display text-4xl font-extrabold">--</p></div>
+<div class="metric"><p class="text-sm text-slate-400">Embedded unrealized gain</p><p id="embeddedGain" class="mt-2 font-display text-4xl font-extrabold">--</p></div>
+<div class="metric"><p class="text-sm text-slate-400">Estimated full-sale tax*</p><p id="fullSaleTax" class="mt-2 font-display text-4xl font-extrabold">--</p></div>
+<div class="metric"><p class="text-sm text-slate-400">Net proceeds after est. tax*</p><p id="netFullSale" class="mt-2 font-display text-4xl font-extrabold">--</p></div>
+</div>
+<div class="card mt-6 p-6"><h2 class="font-display text-2xl font-bold">The cost of remaining concentrated</h2><p class="mt-2 text-sm text-slate-400">Illustrates a decline in the stock position only. It does not predict future performance.</p>
+<div class="mt-6 grid gap-4 sm:grid-cols-3"><div><p class="text-slate-400">20% decline</p><p id="down20" class="mt-1 text-2xl font-bold"></p></div><div><p class="text-slate-400">35% decline</p><p id="down35" class="mt-1 text-2xl font-bold"></p></div><div><p class="text-slate-400">50% decline</p><p id="down50" class="mt-1 text-2xl font-bold"></p></div></div></div>
+<div class="card mt-6 p-6"><p class="eyebrow">Compare Paths</p><h2 class="mt-2 font-display text-2xl font-bold">What happens to the amount you want to diversify?</h2>
+<div class="mt-6 overflow-x-auto"><table class="w-full min-w-[650px] text-left text-sm"><thead class="text-slate-400"><tr class="border-b border-white/10"><th class="py-3 pr-4">Path</th><th class="py-3 pr-4">Amount</th><th class="py-3 pr-4">Tax timing</th><th class="py-3">Tradeoff</th></tr></thead><tbody>
+<tr class="border-b border-white/10"><td class="py-4 pr-4 font-semibold">Sell now</td><td id="sellAmt" class="pr-4"></td><td id="sellTax" class="pr-4"></td><td class="text-slate-400">Immediate liquidity; realizes gain now.</td></tr>
+<tr class="border-b border-white/10"><td class="py-4 pr-4 font-semibold">Stage sales</td><td id="stageAmt" class="pr-4"></td><td id="stageTax" class="pr-4"></td><td class="text-slate-400">Diversifies over time; future price/rate uncertainty remains.</td></tr>
+<tr><td class="py-4 pr-4 font-semibold">Exchange / in-kind review</td><td id="exchangeAmt" class="pr-4"></td><td class="pr-4 text-gold">Potential deferral only if eligible</td><td class="text-slate-400">Eligibility, liquidity, fees and structure-specific rules matter.</td></tr>
+</tbody></table></div>
+<p class="mt-5 text-xs leading-5 text-slate-500">*Simplified estimate: proportional basis on shares sold times user-entered planning tax rate. It does not calculate tax brackets, AMT, deductions, losses, state-specific rules, transaction expenses, RSU/ESPP treatment or other tax items.</p></div>
+<div id="advancedFlags" class="card mt-6 p-6"></div>
+</div></div></div></section>
+
+<section class="border-y border-white/10 bg-white/[0.025] section-pad"><div class="container-shell">
+<p class="eyebrow">Your Next Level of Analysis</p><h2 class="mt-4 max-w-4xl font-display text-4xl font-extrabold sm:text-5xl">Your public snapshot identifies the problem. A custom exit strategy determines how the pieces may work together.</h2>
+<p class="mt-6 max-w-4xl text-lg leading-8 text-slate-300">There are additional tax-aware, charitable, estate, hedging, exchange and liquidity techniques that may be relevant in some situations. They are not automatically displayed as recommendations online because whether they help depends on facts a simple calculator cannot responsibly evaluate.</p>
+<p class="mt-5 max-w-4xl leading-8 text-slate-300">The private review identifies which tools deserve modeling, which do not and whether a coordinated combination could improve the balance between tax cost, diversification, liquidity and control.</p>
+<div class="mt-10 flex flex-wrap items-center gap-6"><a id="reviewCta" href="/stock-review" class="btn-primary">Request My Private Stock Snapshot</a><div><p class="font-display text-3xl font-extrabold">$2,000</p><p class="text-sm text-slate-400">Custom Concentrated Stock Exit Strategy</p></div></div>
+</div></section>
+</main>
+
+<footer class="border-t border-white/10 py-12">
+  <div class="container-shell grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+    <div>
+      <img src="/assets/turill-financial-wordmark-dark.png" alt="Turill Financial" class="h-8 w-auto max-w-[210px] object-contain" width="720" height="94" />
+      <p class="mt-5 max-w-2xl text-xs leading-6 text-slate-500">
+        Educational information only. This website does not provide individualized investment, tax or legal advice.
+        Calculator outputs are simplified planning illustrations based on user-entered assumptions and may not reflect
+        actual taxes, market outcomes, transaction costs, eligibility requirements, product terms or securities-law
+        restrictions. Firm-specific disclosures and compliance approval should be completed before publication.
+      </p>
+    </div>
+    <div class="grid grid-cols-2 gap-6 text-sm">
+      <div>
+        <p class="font-semibold text-slate-300">Site</p>
+        <ul class="mt-3 space-y-2 text-slate-500">
+          <li><a href="/" class="transition hover:text-white">Home</a></li>
+          <li><a href="/about" class="transition hover:text-white">About Us</a></li>
+          <li><a href="/contact" class="transition hover:text-white">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-300">Concentrated Stock</p>
+        <ul class="mt-3 space-y-2 text-slate-500">
+          <li><a href="/concentrated-stock" class="transition hover:text-white">The Strategy</a></li>
+          <li><a href="/stock-analyzer" class="transition hover:text-white">Analyzer</a></li>
+          <li><a href="/stock-review" class="transition hover:text-white">Request a Review</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="container-shell mt-10 border-t border-white/10 pt-6 text-sm text-slate-500">
+    <p>&copy; <span data-year></span> Turill Financial. All rights reserved.</p>
+  </div>
+</footer>
+
+  <script src="/app.js" defer></script>
+  <script src="/stock-analyzer.js" defer></script>
+</body>
+</html>
