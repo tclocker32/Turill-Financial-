@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: turill-financial
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build:css
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # Set these in the Render dashboard, not here.
+      # - key: BOOKING_URL
+      # - key: LEAD_WEBHOOK_URL
