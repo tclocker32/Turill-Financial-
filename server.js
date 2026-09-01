@@ -1,24 +1,163 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
-function saveLead(type, data) {
-  const dir = path.join(__dirname, "data");
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-  const file = path.join(dir, "leads.jsonl");
-  fs.appendFileSync(file, JSON.stringify({ type, ...data, createdAt: new Date().toISOString() }) + "\n");
+const PUBLIC_DIR = path.join(__dirname, "public");
+
+// Render terminates TLS in front of us; this makes req.protocol/req.ip correct.
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+
+app.use(express.urlencoded({ extended: true, limit: "64kb" }));
+app.use(express.json({ limit: "64kb" }));
+
+/* ------------------------------------------------------------------ *
+ * Booking link
+ * ------------------------------------------------------------------ *
+ * Set BOOKING_URL in the Render dashboard (Environment tab) to your
+ * scheduling / payment link — Calendly, Acuity, Stripe, etc.
+ * When it is set, a "Book a call" card appears on the Contact page.
+ * When it is empty, the card is hidden so nothing half-finished shows.
+ * ------------------------------------------------------------------ */
+const BOOKING_URL = (process.env.BOOKING_URL || "").trim();
+const BOOKING_LABEL = (process.env.BOOKING_LABEL || "Book a Call").trim();
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
-app.post("/stock-review", (req, res) => {
-  saveLead("concentrated-stock", req.body);
-  res.redirect("/stock-review-thank-you.html");
+
+function bookingBlock() {
+  if (!/^https:\/\/|^http:\/\//i.test(BOOKING_URL)) return "";
+  return `
+          <div class="glass rounded-3xl border-gold/25 bg-gold/[0.07] p-8 shadow-soft">
+            <p class="eyebrow">Prefer to Pick a Time?</p>
+            <h2 class="mt-4 font-display text-2xl font-bold text-white">Book directly on the calendar.</h2>
+            <p class="mt-3 text-sm leading-7 text-slate-300">Choose a slot that works for you and we&rsquo;ll take it from there.</p>
+            <a href="${escapeHtml(BOOKING_URL)}" class="btn-primary mt-6" target="_blank" rel="noopener noreferrer">${escapeHtml(BOOKING_LABEL)}</a>
+          </div>`;
+}
+
+/* ------------------------------------------------------------------ *
+ * Lead capture
+ * ------------------------------------------------------------------ */
+function saveLead(type, data) {
+  const record = { type, ...data, createdAt: new Date().toISOString() };
+
+  // Always log — on Render this shows up in the service Logs tab.
+  console.log("[lead]", JSON.stringify(record));
+
+  // Best-effort local copy. NOTE: Render's filesystem is ephemeral, so this
+  // file is wiped on every deploy/restart. Treat LEAD_WEBHOOK_URL (below) or
+  // a CRM integration as the real destination.
+  try {
+    const dir = path.join(__dirname, "data");
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(path.join(dir, "leads.jsonl"), JSON.stringify(record) + "\n");
+  } catch (err) {
+    console.error("[lead] could not write local copy:", err.message);
+  }
+
+  // Optional: POST the lead to Zapier / Make / your CRM.
+  const hook = (process.env.LEAD_WEBHOOK_URL || "").trim();
+  if (/^https?:\/\//i.test(hook)) {
+    fetch(hook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(record)
+    }).catch((err) => console.error("[lead] webhook failed:", err.message));
+  }
+
+  return record;
+}
+
+/* ------------------------------------------------------------------ *
+ * Pages (defined before express.static so clean URLs win)
+ * ------------------------------------------------------------------ */
+function sendPage(res, file) {
+  res.sendFile(path.join(PUBLIC_DIR, file));
+}
+
+app.get("/", (req, res) => sendPage(res, "index.html"));
+app.get("/about", (req, res) => sendPage(res, "about.html"));
+app.get("/thank-you", (req, res) => sendPage(res, "thank-you.html"));
+
+app.get("/contact", (req, res) => {
+  fs.readFile(path.join(PUBLIC_DIR, "contact.html"), "utf8", (err, html) => {
+    if (err) return sendPage(res, "contact.html");
+    res.type("html").send(html.replace("{{BOOKING_BLOCK}}", bookingBlock()));
+  });
 });
-app.post("/stock-review", (req, res) => {
+
+// Old .html URLs keep working, and consolidate on one canonical address.
+const ALIASES = {
+  "/index.html": "/",
+  "/about.html": "/about",
+  "/contact.html": "/contact",
+  "/thank-you.html": "/thank-you",
+  "/stock-review-thank-you.html": "/thank-you"
+};
+Object.entries(ALIASES).forEach(([from, to]) => {
+  app.get(from, (req, res) => res.redirect(301, to));
 });
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+
+app.use(
+  express.static(PUBLIC_DIR, {
+    extensions: false,
+    setHeaders(res, filePath) {
+      if (/\.(css|js|svg|png|jpg|jpeg|webp|woff2?)$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "public, max-age=3600");
+      }
+    }
+  })
+);
+
+/* ------------------------------------------------------------------ *
+ * Form handlers
+ * ------------------------------------------------------------------ */
+function handleLead(type) {
+  return (req, res) => {
+    const body = req.body || {};
+
+    // Honeypot — real people never see or fill this field.
+    if (body.company) return res.redirect(303, "/thank-you");
+
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim();
+
+    if (!name || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      return res.redirect(303, "/contact?error=1");
+    }
+
+    saveLead(type, {
+      name: name.slice(0, 200),
+      email: email.slice(0, 200),
+      phone: String(body.phone || "").trim().slice(0, 60),
+      focus: String(body.focus || "").trim().slice(0, 120),
+      message: String(body.message || "").trim().slice(0, 4000)
+    });
+
+    res.redirect(303, "/thank-you");
+  };
+}
+
+app.post("/contact", handleLead("contact"));
+app.post("/stock-review", handleLead("concentrated-stock"));
+
+// Simple uptime check.
+app.get("/healthz", (req, res) => res.json({ ok: true }));
+
+/* ------------------------------------------------------------------ *
+ * 404 — branded, and returns a real 404 status
+ * ------------------------------------------------------------------ */
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html"));
 });
-app.listen(PORT, () => console.log(`Turill Financial V2 running at http://localhost:${PORT}`));
+
+app.listen(PORT, () => console.log(`Turill Financial running on port ${PORT}`));

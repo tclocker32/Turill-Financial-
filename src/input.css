@@ -3,18 +3,35 @@
 @tailwind utilities;
 
 @layer base {
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6rem; }
   body { @apply bg-ink text-slate-100 antialiased; }
   input, select, textarea { color-scheme: dark; }
+  :focus-visible { @apply outline-none ring-2 ring-gold/60 ring-offset-2 ring-offset-ink; }
 }
+
 @layer components {
   .container-shell { @apply mx-auto max-w-7xl px-5 sm:px-6 lg:px-8; }
   .eyebrow { @apply text-xs font-bold uppercase tracking-[0.22em] text-gold; }
+
+  /* Surface treatments used across every page. */
+  .glass { @apply border border-white/10 bg-white/[0.045] backdrop-blur-sm; }
+  .shadow-soft { @apply shadow-[0_24px_60px_-24px_rgba(0,0,0,0.75)]; }
+
   .card { @apply rounded-3xl border border-white/10 bg-white/[0.045]; }
   .metric { @apply rounded-2xl border border-white/10 bg-slate-950/45 p-5; }
+
   .btn-primary { @apply inline-flex items-center justify-center rounded-full bg-gold px-6 py-3.5 text-sm font-bold text-ink transition hover:-translate-y-0.5 hover:brightness-110; }
   .btn-secondary { @apply inline-flex items-center justify-center rounded-full border border-white/15 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10; }
-  .field { @apply w-full rounded-2xl border border-white/10 bg-slate-950/65 px-4 py-3.5 text-white outline-none placeholder:text-slate-500 focus:border-gold/50 focus:ring-2 focus:ring-gold/20; }
-  .section-pad { @apply py-20 sm:py-24 lg:py-28; }
-}
 
+  .field { @apply w-full rounded-2xl border border-white/10 bg-slate-950/65 px-5 py-4 text-white outline-none transition placeholder:text-slate-500 focus:border-gold/50 focus:ring-2 focus:ring-gold/20; }
+  .label { @apply mb-2 block text-sm font-semibold text-slate-300; }
+
+  .section-pad { @apply py-20 sm:py-24 lg:py-28; }
+
+  /* Header navigation */
+  .nav-link { @apply text-sm text-slate-300 transition hover:text-white; }
+  .nav-link-active { @apply text-sm font-semibold text-white; }
+  .nav-link-mobile { @apply block rounded-xl px-4 py-3 text-base text-slate-200 transition hover:bg-white/10 hover:text-white; }
+
+  .prose-body { @apply leading-8 text-slate-300; }
+}
