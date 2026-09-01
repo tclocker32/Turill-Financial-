@@ -19,6 +19,6 @@ app.post("/stock-review", (req, res) => {
 app.post("/stock-review", (req, res) => {
 });
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  path.join(__dirname, "public", "index.html")
 });
 app.listen(PORT, () => console.log(`Turill Financial V2 running at http://localhost:${PORT}`));
