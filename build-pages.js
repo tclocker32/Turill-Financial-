@@ -41,7 +41,8 @@ const PROFILES = [
   "https://www.linkedin.com/in/turillengelman/",
   "https://www.youtube.com/@TurillFin",
   "https://x.com/TurillEngleman",
-  "https://www.facebook.com/profile.php?id=100095489802968"
+  "https://www.facebook.com/profile.php?id=100095489802968",
+  "https://www.instagram.com/turillfinancial_/"
 ];
 
 const SCHEMA = {
