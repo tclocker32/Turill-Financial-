@@ -25,7 +25,14 @@ const SITE = "https://turillfinancial.com";
 const header = fs.readFileSync(path.join(PARTIALS, "header.html"), "utf8");
 const footer = fs.readFileSync(path.join(PARTIALS, "footer.html"), "utf8");
 
-const NAV_KEYS = ["home", "concentrated", "analyzer", "about", "contact"];
+const NAV_KEYS = [
+  "home",
+  "concentrated",
+  "retirement",
+  "analyzer",
+  "about",
+  "contact"
+];
 
 /* Ties the site to the profiles it is the same entity as, so search engines
  * treat the YouTube channel, LinkedIn profile and the rest as one identity

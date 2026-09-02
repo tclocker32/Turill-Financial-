@@ -16,13 +16,16 @@ app.use(express.json({ limit: "64kb" }));
 /* ------------------------------------------------------------------ *
  * Booking link
  * ------------------------------------------------------------------ *
- * Set BOOKING_URL in the Render dashboard (Environment tab) to your
- * scheduling / payment link — Calendly, Acuity, Stripe, etc.
- * When it is set, a "Book a call" card appears on the Contact page.
- * When it is empty, the card is hidden so nothing half-finished shows.
+ * Defaults to the live booking calendar published on Turill's own
+ * Blueprint landing page. Override BOOKING_URL / BOOKING_LABEL in the
+ * Render dashboard (Environment tab) to point somewhere else; set
+ * BOOKING_URL to "off" to hide the card on the Contact page entirely.
  * ------------------------------------------------------------------ */
-const BOOKING_URL = (process.env.BOOKING_URL || "").trim();
-const BOOKING_LABEL = (process.env.BOOKING_LABEL || "Book a Call").trim();
+const DEFAULT_BOOKING_URL =
+  "https://api.leadconnectorhq.com/widget/booking/UjTQTSHBauiLP2Zrf0V7";
+
+const BOOKING_URL = (process.env.BOOKING_URL ?? DEFAULT_BOOKING_URL).trim();
+const BOOKING_LABEL = (process.env.BOOKING_LABEL || "Book a Conversation").trim();
 
 function escapeHtml(value) {
   return String(value)
@@ -108,6 +111,7 @@ const ROUTES = {
   "/": "index.html",
   "/about": "about.html",
   "/concentrated-stock": "concentrated-stock.html",
+  "/retirement-planning": "retirement-planning.html",
   "/stock-analyzer": "stock-analyzer.html",
   "/stock-review": "stock-review.html",
   "/thank-you": "thank-you.html"
@@ -130,6 +134,8 @@ const ALIASES = {
   "/about.html": "/about",
   "/contact.html": "/contact",
   "/concentrated-stock.html": "/concentrated-stock",
+  "/retirement-planning.html": "/retirement-planning",
+  "/financial-plan-landing-page-page": "/retirement-planning",
   "/stock-analyzer.html": "/stock-analyzer",
   "/stock-review.html": "/stock-review",
   "/thank-you.html": "/thank-you",
