@@ -27,6 +27,44 @@ const DEFAULT_BOOKING_URL =
 const BOOKING_URL = (process.env.BOOKING_URL ?? DEFAULT_BOOKING_URL).trim();
 const BOOKING_LABEL = (process.env.BOOKING_LABEL || "Book a Conversation").trim();
 
+/* ------------------------------------------------------------------ *
+ * Preview mode
+ * ------------------------------------------------------------------ *
+ * Tactive Compliance must review any change BEFORE it goes live, so the
+ * repo deploys twice: `main` -> the live site, `staging` -> a review copy.
+ * Both run this same code. The review copy is turned on by setting
+ * SITE_ENV=preview in that service's Environment tab; the live service
+ * leaves SITE_ENV unset and is therefore completely unaffected.
+ *
+ * Preview mode does three things, all of them defensive:
+ *   1. paints a permanent bar so nobody mistakes the copy for the real site
+ *   2. adds robots noindex (meta + header) and serves a deny-all robots.txt
+ *   3. leaves everything else — routing, forms, booking card — identical,
+ *      so what compliance signs off on is what ships.
+ * ------------------------------------------------------------------ */
+const IS_PREVIEW = (process.env.SITE_ENV || "").trim().toLowerCase() === "preview";
+
+const NOINDEX_META = `<meta name="robots" content="noindex, nofollow" />`;
+
+// Fixed to the BOTTOM on purpose: the site header is fixed to the top, so a
+// bar up there would sit over the navigation on every page.
+const PREVIEW_BANNER = `
+<div style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#b45309;color:#fff;
+            font:600 13px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+            padding:10px 16px;text-align:center;letter-spacing:.01em;
+            box-shadow:0 -2px 12px rgba(0,0,0,.35)">
+  PREVIEW COPY &mdash; for compliance review only. This is not the live website and is not indexed by search engines.
+</div>`;
+
+function applyPreview(html) {
+  if (!IS_PREVIEW) return html;
+  // /thank-you already carries its own robots noindex — don't emit a second one.
+  const withMeta = /name="robots"/i.test(html)
+    ? html
+    : html.replace("</head>", `  ${NOINDEX_META}\n</head>`);
+  return withMeta.replace("</body>", `${PREVIEW_BANNER}\n</body>`);
+}
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -103,8 +141,32 @@ function saveLead(type, fields) {
 /* ------------------------------------------------------------------ *
  * Pages (defined before express.static so clean URLs win)
  * ------------------------------------------------------------------ */
-function sendPage(res, file) {
-  res.sendFile(path.join(PUBLIC_DIR, file));
+// Pages are read and rendered rather than sent straight from disk, because
+// two things get injected: the booking card on Contact, and (preview only)
+// the review banner. Outside preview mode the output is byte-identical to
+// the file, so the live site behaves exactly as it did before.
+function sendPage(res, file, status = 200) {
+  fs.readFile(path.join(PUBLIC_DIR, file), "utf8", (err, html) => {
+    if (err) {
+      // Fall back to the raw file rather than 500-ing on a read hiccup.
+      return res.status(status).sendFile(path.join(PUBLIC_DIR, file));
+    }
+    res.status(status).type("html").send(applyPreview(html));
+  });
+}
+
+// Belt and braces: even if a page is fetched some way that skips the meta
+// tag, the header keeps the review copy out of the index.
+if (IS_PREVIEW) {
+  app.use((req, res, next) => {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow");
+    next();
+  });
+
+  // Must be declared before express.static, or the real robots.txt wins.
+  app.get("/robots.txt", (req, res) => {
+    res.type("text/plain").send("User-agent: *\nDisallow: /\n");
+  });
 }
 
 const ROUTES = {
@@ -124,7 +186,7 @@ Object.entries(ROUTES).forEach(([url, file]) => {
 app.get("/contact", (req, res) => {
   fs.readFile(path.join(PUBLIC_DIR, "contact.html"), "utf8", (err, html) => {
     if (err) return sendPage(res, "contact.html");
-    res.type("html").send(html.replace("{{BOOKING_BLOCK}}", bookingBlock()));
+    res.type("html").send(applyPreview(html.replace("{{BOOKING_BLOCK}}", bookingBlock())));
   });
 });
 
@@ -193,7 +255,7 @@ app.get("/healthz", (req, res) => res.json({ ok: true }));
  * 404 — branded, and returns a real 404 status
  * ------------------------------------------------------------------ */
 app.use((req, res) => {
-  res.status(404).sendFile(path.join(PUBLIC_DIR, "404.html"));
+  sendPage(res, "404.html", 404);
 });
 
 app.listen(PORT, () => console.log(`Turill Financial running on port ${PORT}`));
