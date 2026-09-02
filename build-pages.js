@@ -27,6 +27,38 @@ const footer = fs.readFileSync(path.join(PARTIALS, "footer.html"), "utf8");
 
 const NAV_KEYS = ["home", "concentrated", "analyzer", "about", "contact"];
 
+/* Ties the site to the profiles it is the same entity as, so search engines
+ * treat the YouTube channel, LinkedIn profile and the rest as one identity
+ * rather than five unrelated pages. Every URL here has been confirmed to load. */
+const PROFILES = [
+  "https://www.linkedin.com/in/turillengelman/",
+  "https://www.youtube.com/@TurillFin",
+  "https://x.com/TurillEngleman",
+  "https://www.facebook.com/profile.php?id=100095489802968"
+];
+
+const SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "FinancialService",
+  name: "Turill Financial",
+  url: SITE,
+  image: `${SITE}/assets/turill-financial-icon.png`,
+  telephone: "+1-714-592-4990",
+  areaServed: "US",
+  sameAs: PROFILES,
+  founder: {
+    "@type": "Person",
+    name: "Turill Engelman",
+    jobTitle: "Financial Planning Advisor",
+    sameAs: PROFILES
+  },
+  parentOrganization: {
+    "@type": "Organization",
+    name: "Tactive Advisors, LLC",
+    url: "https://tactiveadvisors.com"
+  }
+};
+
 function shell(meta, body) {
   const canonical = meta.url ? `${SITE}${meta.url}` : null;
   return `<!doctype html>
@@ -40,14 +72,19 @@ ${canonical ? `  <link rel="canonical" href="${canonical}" />\n` : ""}${meta.noi
   <meta property="og:site_name" content="Turill Financial" />
   <meta property="og:title" content="${meta.title}" />
   <meta property="og:description" content="${meta.description}" />
-${canonical ? `  <meta property="og:url" content="${canonical}" />\n` : ""}  <meta property="og:image" content="${SITE}/assets/turill-financial-icon.png" />
-  <meta name="twitter:card" content="summary" />
+${canonical ? `  <meta property="og:url" content="${canonical}" />\n` : ""}  <meta property="og:image" content="${SITE}/assets/turill-og-card.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@TurillEngleman" />
+  <meta name="twitter:image" content="${SITE}/assets/turill-og-card.png" />
   <link rel="icon" href="/favicon.ico" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
+  <script type="application/ld+json">${JSON.stringify(SCHEMA)}</script>
 </head>
 <body class="flex min-h-screen flex-col font-sans">
 ${header}
