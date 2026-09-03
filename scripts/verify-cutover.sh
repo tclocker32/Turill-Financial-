@@ -61,7 +61,7 @@ esac
 echo
 echo "--- 3. The website itself ---"
 for url in "https://$DOMAIN/" "https://www.$DOMAIN/"; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 90 "$url")
+  code=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 90 "$url")
   [ "$code" = "200" ] && ok "$url -> 200" || bad "$url -> $code"
 done
 
@@ -71,7 +71,7 @@ echo "  http://$DOMAIN/ -> $loc"
 
 echo
 echo "--- 4. Is it actually OUR site (not the old host)? ---"
-body=$(curl -s --max-time 90 "https://$DOMAIN/")
+body=$(curl -sL --max-time 90 "https://$DOMAIN/")
 printf '%s' "$body" | grep -q "Turill Financial" && ok "page says Turill Financial" || bad "unexpected page content"
 printf '%s' "$body" | grep -q "CRD #6922637"     && ok "compliance disclosure present" || bad "disclosure missing"
 printf '%s' "$body" | grep -q "PREVIEW COPY" \
@@ -83,10 +83,10 @@ printf '%s' "$body" | grep -q "pending firm compliance approval" \
 echo
 echo "--- 5. Every page answers ---"
 for p in "" about contact concentrated-stock retirement-planning stock-analyzer stock-review thank-you; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "https://$DOMAIN/$p")
+  code=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 60 "https://$DOMAIN/$p")
   [ "$code" = "200" ] && ok "/$p -> 200" || bad "/$p -> $code"
 done
-code404=$(curl -s -o /dev/null -w "%{http_code}" --max-time 60 "https://$DOMAIN/no-such-page")
+code404=$(curl -sL -o /dev/null -w "%{http_code}" --max-time 60 "https://$DOMAIN/no-such-page")
 [ "$code404" = "404" ] && ok "unknown URL returns a real 404" || bad "unknown URL returned $code404"
 
 echo
