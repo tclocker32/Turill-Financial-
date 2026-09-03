@@ -147,3 +147,56 @@ it.
 - `mail` / `webmail` / `cpanel` / `autodiscover` / `autoconfig` / `ftp` — untouched.
   Your mail clients and webmail keep connecting exactly as they do now.
 - The cPanel account itself stays open. Only the website traffic moves.
+
+---
+
+## After the cutover — three follow-ups, on separate days
+
+Do these one at a time. If two things change at once and something breaks, you
+cannot tell which one did it.
+
+### 1. Make turillfinancial.com the primary domain (do first)
+
+Render is currently redirecting `turillfinancial.com` to `www.turillfinancial.com`.
+That is backwards for this site: `build-pages.js` sets
+`SITE = "https://turillfinancial.com"`, and that bare domain is what every page's
+canonical tag, `og:url`, JSON-LD and the sitemap already declare. Leaving the
+redirect as-is means search engines are pointed at one address while the site
+claims another.
+
+Render's documented behaviour: *add the root domain and Render automatically adds
+the `www` subdomain and redirects it to the root.* So:
+
+1. Settings → Custom Domains.
+2. Delete **both** `turillfinancial.com` and `www.turillfinancial.com`.
+3. Add **only** `turillfinancial.com`. Render adds the `www` redirect itself.
+4. No DNS change is needed — the two records already in cPanel stay exactly as
+   they are.
+
+Expect a few minutes of certificate re-issuing afterwards.
+
+### 2. Remove `+a` from the SPF record (wait until the site is confirmed stable)
+
+The TXT record currently reads:
+
+```
+v=spf1 +a +mx +ip4:67.223.118.121 +ip4:67.223.118.124 include:spf.web-hosting.com ~all
+```
+
+`+a` means *whatever the apex A record points at is allowed to send mail as this
+domain*. That used to be the Namecheap web server. It now silently means Render's
+shared load balancer — an address shared with every other Render customer.
+Nothing breaks and nothing warns you; it just widens who can send mail claiming
+to be you. Replace it with:
+
+```
+v=spf1 +mx +ip4:67.223.118.121 +ip4:67.223.118.124 include:spf.web-hosting.com ~all
+```
+
+Your own mail keeps working: `+mx` and the two `ip4:` entries still cover the
+Namecheap mail servers. Send yourself a test message from webmail afterwards.
+
+### 3. Raise the TTLs back to 14400
+
+Only once everything above is settled and you are happy. 300 seconds is a
+cutover setting; leaving it there just means more DNS lookups forever.
